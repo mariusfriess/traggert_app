@@ -81,30 +81,27 @@ class _HomePageState extends State<HomePage> {
             else
               // Top row with filter and sort buttons
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Filtere anhand der Mac-Adresse',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.search),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: SearchBar(
+                    onChanged: (val) {
+                      setState(() {
+                        filter = val;
+                      });
+                    },
+                    padding: const WidgetStatePropertyAll<EdgeInsets>(
+                        EdgeInsets.symmetric(horizontal: 16.0)),
+                    elevation: const WidgetStatePropertyAll<double>(1.0),
+                    leading: const Icon(Icons.search),
+                    trailing: [
+                      Tooltip(
+                        message: 'Sortiere nach Mac-Adresse',
+                        child: IconButton(
+                          onPressed: _sortPositionsByMac,
+                          icon: const Icon(Icons.sort),
                         ),
-                        onChanged: (val) {
-                          setState(() {
-                            filter = val;
-                          });
-                        },
                       ),
-                    ),
-                    IconButton(
-                      onPressed: _sortPositionsByMac,
-                      icon: Icon(Icons.sort),
-                    )
-                  ],
-                ),
-              ),
+                    ],
+                  )),
             const SizedBox(height: 16),
             if (filteredPositions.isEmpty)
               const Expanded(
@@ -115,23 +112,26 @@ class _HomePageState extends State<HomePage> {
             else
               // Result: List of positions
               Expanded(
-                child: ListView.builder(
-                  itemCount: filteredPositions.length,
-                  itemBuilder: (context, index) {
-                    final position = filteredPositions[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text('Mac: ${position.mac}'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Latitude: ${position.latitude}'),
-                            Text('Longitude: ${position.longitude}'),
-                          ],
+                child: RefreshIndicator(
+                  onRefresh: _fetchPositions,
+                  child: ListView.builder(
+                    itemCount: filteredPositions.length,
+                    itemBuilder: (context, index) {
+                      final position = filteredPositions[index];
+                      return Card(
+                        child: ListTile(
+                          title: Text('Mac: ${position.mac}'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Latitude: ${position.latitude}'),
+                              Text('Longitude: ${position.longitude}'),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             const SizedBox(height: 16),
@@ -140,6 +140,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: _fetchPositions,
               child: Text("Daten erneut laden"),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
