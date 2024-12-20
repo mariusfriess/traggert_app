@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   String errorMessage = '';
 
   List<Position> positions = [];
-  List<Position> filteredPositions = [];
+  String filter = '';
 
   @override
   void initState() {
@@ -32,21 +32,16 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchPositions() async {
     setState(() {
       positions = [];
-      filteredPositions = [];
       errorMessage = '';
+      filter = '';
     });
 
     try {
       final apiResponse = await ETagApiService.fetchPositions();
 
-      if (apiResponse.success && !apiResponse.hasError) {
-        List<Position> positions = apiResponse.positions;
-
-        setState(() {
-          this.positions = positions;
-          filteredPositions = positions;
-        });
-      }
+      setState(() {
+        positions = apiResponse.positions;
+      });
     } catch (e) {
       setState(() {
         errorMessage = "$e";
@@ -57,20 +52,16 @@ class _HomePageState extends State<HomePage> {
   void _sortPositionsByMac() {
     setState(() {
       positions.sort((a, b) => a.mac.compareTo(b.mac));
-      filteredPositions.sort((a, b) => a.mac.compareTo(b.mac));
-    });
-  }
-
-  void _filterPositionsByMacPrefix(String prefix) {
-    setState(() {
-      filteredPositions = positions
-          .where((position) => position.mac.startsWith(prefix))
-          .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    List<Position> filteredPositions = positions
+        .where((element) =>
+            element.mac.toLowerCase().startsWith(filter.toLowerCase()))
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Traggert Demo App'),
@@ -92,17 +83,21 @@ class _HomePageState extends State<HomePage> {
             else if (errorMessage.isNotEmpty)
               Text(errorMessage)
             else
+              // Top row with filter and sort buttons
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
-                  // Top row with filter and sort buttons
                   children: [
                     Expanded(
                       child: TextField(
                         decoration: const InputDecoration(
                             labelText: 'Filtere anhand der Mac-Adresse',
                             border: OutlineInputBorder()),
-                        onChanged: _filterPositionsByMacPrefix,
+                        onChanged: (val) {
+                          setState(() {
+                            filter = val;
+                          });
+                        },
                       ),
                     ),
                     IconButton(
@@ -119,8 +114,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               )
             else
+              // Result: List of positions
               Expanded(
-                // Result: List of positions
                 child: ListView.builder(
                   itemCount: filteredPositions.length,
                   itemBuilder: (context, index) {
