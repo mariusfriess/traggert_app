@@ -96,6 +96,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Traggert Demo App'),
         centerTitle: true,
+        elevation: 4,
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
