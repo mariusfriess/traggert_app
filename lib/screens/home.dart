@@ -1,8 +1,5 @@
-import 'dart:convert' as convert;
-
 import 'package:flutter/material.dart';
 
-import 'package:http/http.dart' as http;
 import 'package:traggert_app/models/etag-api.model.dart';
 import 'package:traggert_app/services/etag-api.service.dart';
 
