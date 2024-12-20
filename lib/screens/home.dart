@@ -3,7 +3,8 @@ import 'dart:convert' as convert;
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:traggert_app/models/position.dart';
+import 'package:traggert_app/models/etag-api.model.dart';
+import 'package:traggert_app/services/etag-api.service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,48 +37,26 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      final apiResponse = await ETagApiService.fetchPositions();
 
-      if (response.statusCode == 200) {
-        // Http request had no errors
-        final responseJson = convert.jsonDecode(response.body);
+      if (apiResponse.success && !apiResponse.hasError) {
+        List<Position> positions = apiResponse.positions;
 
-        if (responseJson['success'] == true && responseJson['error'] == 0) {
-          // Internal API was successful
-          List<dynamic> positionListJson = responseJson['positions'];
-
-          positions = positionListJson
-              .map((positionJson) => Position.fromJson(positionJson))
-              .toList();
-
-          setState(() {
-            filteredPositions = positions;
-          });
-        } else {
-          setState(() {
-            // Internal API returned an error
-            errorMessage =
-                "Die API hat einen Fehler beim Abrufen der Daten. Fehlercode: ${responseJson['error']}";
-          });
-        }
-      } else {
-        // Http request had an error
         setState(() {
-          errorMessage =
-              'Fehler beim Abrufen der Positionen. HTTP-Status: ${response.statusCode}';
+          this.positions = positions;
+          filteredPositions = positions;
         });
       }
     } catch (e) {
-      // Error while fetching data
       setState(() {
-        errorMessage =
-            'Ein unerwarteter Fehler ist aufgetreten. Fehlermeldung: $e';
+        errorMessage = "$e";
       });
     }
   }
 
   void _sortPositionsByMac() {
     setState(() {
+      positions.sort((a, b) => a.mac.compareTo(b.mac));
       filteredPositions.sort((a, b) => a.mac.compareTo(b.mac));
     });
   }
