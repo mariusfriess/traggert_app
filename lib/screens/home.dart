@@ -65,9 +65,8 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         elevation: 4,
       ),
-      body: Container(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
-        margin: EdgeInsets.only(bottom: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -88,8 +87,10 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: TextField(
                         decoration: const InputDecoration(
-                            labelText: 'Filtere anhand der Mac-Adresse',
-                            border: OutlineInputBorder()),
+                          labelText: 'Filtere anhand der Mac-Adresse',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.search),
+                        ),
                         onChanged: (val) {
                           setState(() {
                             filter = val;
@@ -104,6 +105,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
+            const SizedBox(height: 16),
             if (filteredPositions.isEmpty)
               const Expanded(
                 child: Center(
@@ -116,22 +118,23 @@ class _HomePageState extends State<HomePage> {
                 child: ListView.builder(
                   itemCount: filteredPositions.length,
                   itemBuilder: (context, index) {
+                    final position = filteredPositions[index];
                     return Card(
                       child: ListTile(
-                        title: Text("Mac: ${filteredPositions[index].mac}"),
+                        title: Text('Mac: ${position.mac}'),
                         subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                  "Latitude: ${filteredPositions[index].latitude}"),
-                              Text(
-                                  "Longitude: ${filteredPositions[index].longitude}"),
-                            ]),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Latitude: ${position.latitude}'),
+                            Text('Longitude: ${position.longitude}'),
+                          ],
+                        ),
                       ),
                     );
                   },
                 ),
               ),
+            const SizedBox(height: 16),
             // Reload data
             ElevatedButton(
               onPressed: _fetchPositions,
